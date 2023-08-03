@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+# Bazel build directory
+bazel-out/
+
+# Bazel symlinks
+/bazel-*
+
+# Bazel testlogs, genfiles, bin, etc.
+bazel-bin/
+bazel-genfiles/
+bazel-testlogs/
+bazel-src/
+
+# User-specific Bazel directories
+.user.bazelrc
+bazelrc
