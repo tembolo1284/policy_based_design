@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build & Test (${{ matrix.compiler }} · ${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        mode: [debug, release]
+
+    env:
+      # Bazel configs are provided via your .bazelrc and build.sh;
+      # we pass them explicitly to avoid duplication warnings.
+      BAZEL_CONFIGS: --config=${{ matrix.compiler }} --config=${{ matrix.mode }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bazelisk
+        run: |
+          curl -L https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 -o bazelisk
+          chmod +x bazelisk
+          sudo mv bazelisk /usr/local/bin/bazel
+          bazel version
+
+      - name: Set up compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          else
+            echo "CC=gcc" >> $GITHUB_ENV
+            echo "CXX=g++" >> $GITHUB_ENV
+          fi
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.cache/bazelisk
+          key: bazel-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.mode }}-${{ hashFiles('MODULE.bazel', '.bazelrc', 'lib/**', 'src/**', 'python/**') }}
+          restore-keys: |
+            bazel-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.mode }}-
+            bazel-${{ runner.os }}-
+
+      - name: bazel mod tidy
+        run: bazel mod tidy
+
+      - name: Build all
+        run: bazel build //... $BAZEL_CONFIGS
+
+      - name: Test all
+        run: bazel test //... $BAZEL_CONFIGS
+
+      - name: Run Python example
+        run: bazel run //python:example $BAZEL_CONFIGS
+
+  sanitizers:
+    name: Sanitizers (${{ matrix.san }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        san: [asan, ubsan]
+
+    env:
+      # Sanitizer configs are defined in .bazelrc as build:asan / build:ubsan
+      BAZEL_CONFIGS: --config=gcc --config=${{ matrix.san }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bazelisk
+        run: |
+          curl -L https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 -o bazelisk
+          chmod +x bazelisk
+          sudo mv bazelisk /usr/local/bin/bazel
+          bazel version
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.cache/bazelisk
+          key: bazel-san-${{ runner.os }}-${{ matrix.san }}-${{ hashFiles('MODULE.bazel', '.bazelrc', 'lib/**', 'src/**', 'python/**') }}
+          restore-keys: |
+            bazel-san-${{ runner.os }}-${{ matrix.san }}-
+            bazel-san-${{ runner.os }}-
+
+      - name: bazel mod tidy
+        run: bazel mod tidy
+
+      - name: Test with sanitizer
+        run: bazel test //... $BAZEL_CONFIGS
+
