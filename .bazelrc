@@ -1,0 +1,65 @@
+# ===========================================================================
+# C++20 Standard
+# ===========================================================================
+build --cxxopt=-std=c++20
+build --host_cxxopt=-std=c++20
+
+# ===========================================================================
+# Strict warning flags - catch ALL errors and warnings
+# ===========================================================================
+build --cxxopt=-Wall
+build --cxxopt=-Wextra
+build --cxxopt=-Werror
+build --cxxopt=-Wpedantic
+build --cxxopt=-Wshadow
+build --cxxopt=-Wconversion
+build --cxxopt=-Wsign-conversion
+build --cxxopt=-Wnon-virtual-dtor
+build --cxxopt=-Wold-style-cast
+build --cxxopt=-Wcast-align
+build --cxxopt=-Wunused
+build --cxxopt=-Woverloaded-virtual
+build --cxxopt=-Wformat=2
+
+# ===========================================================================
+# Compiler configurations
+# ===========================================================================
+build:gcc --repo_env=CC=gcc
+build:gcc --repo_env=CXX=g++
+build:gcc --cxxopt=-fdiagnostics-color=always
+
+build:clang --repo_env=CC=clang
+build:clang --repo_env=CXX=clang++
+build:clang --cxxopt=-fcolor-diagnostics
+
+# ===========================================================================
+# Build mode configurations
+# ===========================================================================
+build:debug --compilation_mode=dbg
+build:debug --copt=-O0
+build:debug --copt=-g3
+build:debug --strip=never
+
+build:release --compilation_mode=opt
+build:release --copt=-O3
+build:release --copt=-DNDEBUG
+build:release --strip=always
+
+# ===========================================================================
+# Default configuration (GCC + Debug)
+# ===========================================================================
+build --config=gcc
+build --config=debug
+
+# ===========================================================================
+# General settings
+# ===========================================================================
+build --verbose_failures
+build --announce_rc
+common --color=yes
+
+# ===========================================================================
+# Test configuration
+# ===========================================================================
+test --test_output=errors
+test --test_summary=detailed
