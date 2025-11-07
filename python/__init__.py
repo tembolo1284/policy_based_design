@@ -6,10 +6,3 @@ from .calculator_py import (
     InterestRateCalculator,
 )
 
-__all__ = [
-    'PresentValueCalculator',
-    'FutureValueCalculator',
-    'InterestRateCalculator',
-]
-
-__version__ = '0.1.0'

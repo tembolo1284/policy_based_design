@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Example usage of the Policy-Based Design Calculator with real financial math
-
-This script demonstrates the enhanced calculator with parameters and vectors,
-showing realistic financial calculations in Python.
 """
 
-from calculator import (
+from python import (
     PresentValueCalculator,
     FutureValueCalculator,
     InterestRateCalculator,

@@ -11,10 +11,13 @@ py_library(
     srcs = ["__init__.py"],
     data = [":calculator_py"],
     visibility = ["//visibility:public"],
+    imports = ["."],
 )
 
 py_binary(
     name = "example",
     srcs = ["example.py"],
     deps = [":calculator"],
+    imports = ["."],
 )
+
