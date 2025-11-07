@@ -15,7 +15,7 @@ local_repository(
 )
 
 # ============================================================================
-# Python bindings dependencies (NEW)
+# Python bindings dependencies
 # ============================================================================
 
 # Python rules
@@ -38,7 +38,7 @@ python_register_toolchains(
 # pybind11_bazel
 http_archive(
     name = "pybind11_bazel",
-    sha256 = "2c466c6f425b3a5f83f9b6f5c0c83a5b1e6f4f8c0f8e1e2f0e5e6e4f3a2b1c0d",
+    sha256 = "e8355ee56c2ff772334b4bfa22be17c709e5573f6d1d561c7176312156c27bd4",
     strip_prefix = "pybind11_bazel-2.11.1",
     urls = ["https://github.com/pybind/pybind11_bazel/archive/refs/tags/v2.11.1.tar.gz"],
 )

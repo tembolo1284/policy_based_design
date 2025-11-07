@@ -1,0 +1,12 @@
+module(
+    name = "policy_based_design",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "rules_python", version = "0.31.0")
+bazel_dep(name = "pybind11_bazel", version = "2.11.1")
+bazel_dep(name = "pybind11", version = "2.11.1")
+bazel_dep(name = "googletest", version = "1.14.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.11")
