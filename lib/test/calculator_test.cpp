@@ -15,7 +15,7 @@ TEST(PresentValuePolicyTest, BasicCalculation) {
     // PV = 100 / (1.10) = 90.909...
     std::vector<double> cash_flows = {100.0};
     double pv = calc.calculate(0.10, cash_flows);
-    
+    std::cout << "pv = " << pv << "\n";    
     ASSERT_NEAR(pv, 90.909, 0.01);
 }
 
@@ -37,10 +37,8 @@ TEST(PresentValuePolicyTest, BondValuation) {
     // Bond: 3 years, $50 annual coupon, $1000 face value, 6% discount
     std::vector<double> cash_flows = {50.0, 50.0, 1050.0};
     double pv = calc.calculate(0.06, cash_flows);
-    
-    // Expected: approximately $1000 (par bond when coupon rate = discount rate)
-    // Actually: 50/1.06 + 50/1.06^2 + 1050/1.06^3 ≈ 1000
-    ASSERT_NEAR(pv, 1000.0, 1.0);
+    std::cout << "pv = " << pv << "\n";
+    ASSERT_NEAR(pv, 973.27, 1.0);
 }
 
 TEST(PresentValuePolicyTest, EmptyCashFlows) {
@@ -197,11 +195,11 @@ TEST(IntegrationTest, PresentValueFutureValueRoundTrip) {
     double future = fv_calc.calculate(1000.0, 0.08, 5);
     
     // Now discount that future value back to present
-    std::vector<double> cash_flows(5, 0.0);
-    cash_flows.push_back(future);  // All future value comes at end
+    std::vector<double> cash_flows(4, 0.0);
+    cash_flows.push_back(future);
     
     double present = pv_calc.calculate(0.08, cash_flows);
-    
+    std::cout << "present = " << present << "\n"; 
     // Should get back approximately $1000
     ASSERT_NEAR(present, 1000.0, 1.0);
 }

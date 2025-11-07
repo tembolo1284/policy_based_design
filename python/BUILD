@@ -9,7 +9,7 @@ pybind_extension(
 py_library(
     name = "calculator",
     srcs = ["__init__.py"],
-    data = [":calculator_py.so"],
+    data = [":calculator_py"],
     visibility = ["//visibility:public"],
 )
 

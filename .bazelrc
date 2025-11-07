@@ -1,17 +1,9 @@
-# ===========================================================================
-# Keep root directory clean
-# ===========================================================================
+# Keep the build tree under ./build/
 build --symlink_prefix=build/bazel-
 
-# ===========================================================================
-# C++20 Standard
-# ===========================================================================
+# C++ standard & warnings (apply to host & target)
 build --cxxopt=-std=c++20
 build --host_cxxopt=-std=c++20
-
-# ===========================================================================
-# Strict warning flags - catch ALL errors and warnings
-# ===========================================================================
 build --cxxopt=-Wall
 build --cxxopt=-Wextra
 build --cxxopt=-Werror
@@ -26,45 +18,25 @@ build --cxxopt=-Wunused
 build --cxxopt=-Woverloaded-virtual
 build --cxxopt=-Wformat=2
 
-# ===========================================================================
-# Compiler configurations
-# ===========================================================================
-build:gcc --repo_env=CC=gcc
-build:gcc --repo_env=CXX=g++
-build:gcc --cxxopt=-fdiagnostics-color=always
+# Compiler-specific toggles
+build:gcc   --repo_env=CC=gcc
+build:gcc   --repo_env=CXX=g++
+build:gcc   --cxxopt=-fdiagnostics-color=always
 
 build:clang --repo_env=CC=clang
 build:clang --repo_env=CXX=clang++
 build:clang --cxxopt=-fcolor-diagnostics
 
-# ===========================================================================
-# Build mode configurations
-# ===========================================================================
-build:debug --compilation_mode=dbg
-build:debug --copt=-O0
-build:debug --copt=-g3
-build:debug --strip=never
+# Build modes (your script supplies --config=debug or --config=release)
+build:debug   --compilation_mode=dbg --copt=-O0 --copt=-g3 --strip=never
+build:release --compilation_mode=opt --copt=-O3 --copt=-DNDEBUG --strip=always
 
-build:release --compilation_mode=opt
-build:release --copt=-O3
-build:release --copt=-DNDEBUG
-build:release --strip=always
-
-# ===========================================================================
-# Default configuration (GCC + Debug)
-# ===========================================================================
-build --config=gcc
-build --config=debug
-
-# ===========================================================================
-# General settings
-# ===========================================================================
+# General niceties
 build --verbose_failures
 build --announce_rc
 common --color=yes
 
-# ===========================================================================
-# Test configuration
-# ===========================================================================
+# Test output
 test --test_output=errors
 test --test_summary=detailed
+

@@ -1,109 +1,80 @@
-#ifndef CalculationPolicies_HPP
-#define CalculationPolicies_HPP
+#ifndef CALCULATIONPOLICIES_HPP
+#define CALCULATIONPOLICIES_HPP
 
-#include <iostream>
-#include <string>
 #include <vector>
 #include <cmath>
-#include <numeric>
 #include <stdexcept>
+#include <cstddef>
 
 // ===========================================================================
 // PresentValuePolicy
+// PV = Σ_{i=0..n-1} CF_i / (1 + r)^(i+1)
+//   • All cash flows are future-dated: the first element occurs at t = 1
+//   • discount_rate is decimal (e.g., 0.05 for 5%)
 // ===========================================================================
-// Calculate the present value of a series of future cash flows
-// Formula: PV = Σ(CF_t / (1 + r)^t) for t = 1 to n
-class PresentValuePolicy {
-public:
+struct PresentValuePolicy {
     static double calculate(double discount_rate, const std::vector<double>& cash_flows) {
-        if (cash_flows.empty()) {
-            throw std::invalid_argument("Cash flows vector cannot be empty");
-        }
-        
         if (discount_rate <= -1.0) {
-            throw std::invalid_argument("Discount rate must be greater than -1");
+            throw std::invalid_argument("discount_rate must be > -1");
         }
-        
-        std::cout << "PresentValuePolicy: Calculating PV with discount rate " 
-                  << discount_rate << " for " << cash_flows.size() 
-                  << " cash flows\n";
-        
-        double present_value = 0.0;
-        for (size_t t = 0; t < cash_flows.size(); ++t) {
-            double discount_factor = std::pow(1.0 + discount_rate, static_cast<double>(t + 1));
-            present_value += cash_flows[t] / discount_factor;
-            
-            std::cout << "  Period " << (t + 1) << ": CF=" << cash_flows[t] 
-                      << ", Discount Factor=" << discount_factor 
-                      << ", PV=" << (cash_flows[t] / discount_factor) << "\n";
+        if (cash_flows.empty()) {
+            throw std::invalid_argument("cash_flows must not be empty");
         }
-        
-        std::cout << "  Total Present Value: " << present_value << "\n";
-        return present_value;
+
+        const double base = 1.0 + discount_rate;
+        double pv = 0.0;
+        for (std::size_t i = 0; i < cash_flows.size(); ++i) {
+            const double t = static_cast<double>(i) + 1.0; // first CF discounted once
+            pv += cash_flows[i] / std::pow(base, t);
+        }
+        return pv;
     }
 };
 
 // ===========================================================================
 // FutureValuePolicy
+// FV = PV * (1 + r)^n
+//   • interest_rate is decimal (e.g., 0.05 for 5%)
+//   • periods is a nonnegative integer
 // ===========================================================================
-// Calculate the future value of a present amount
-// Formula: FV = PV * (1 + r)^n
-class FutureValuePolicy {
-public:
+struct FutureValuePolicy {
     static double calculate(double principal, double interest_rate, int periods) {
         if (principal < 0.0) {
-            throw std::invalid_argument("Principal must be non-negative");
+            throw std::invalid_argument("principal must be >= 0");
         }
-        
-        if (periods < 0) {
-            throw std::invalid_argument("Periods must be non-negative");
-        }
-        
         if (interest_rate <= -1.0) {
-            throw std::invalid_argument("Interest rate must be greater than -1");
+            throw std::invalid_argument("interest_rate must be > -1");
         }
-        
-        std::cout << "FutureValuePolicy: Calculating FV of principal=" << principal
-                  << " at rate=" << interest_rate 
-                  << " over " << periods << " periods\n";
-        
-        double future_value = principal * std::pow(1.0 + interest_rate, static_cast<double>(periods));
-        
-        std::cout << "  Growth Factor: " << std::pow(1.0 + interest_rate, static_cast<double>(periods)) << "\n";
-        std::cout << "  Future Value: " << future_value << "\n";
-        
-        return future_value;
+        if (periods < 0) {
+            throw std::invalid_argument("periods must be >= 0");
+        }
+
+        return principal * std::pow(1.0 + interest_rate, static_cast<double>(periods));
     }
 };
 
 // ===========================================================================
 // InterestRateConversionPolicy
+// Effective Annual Rate (EAR) from nominal r with n compounding periods/year:
+// EAR = (1 + r/n)^n - 1
+//   • For n = 1, return r exactly (avoids tiny FP diffs in strict tests)
 // ===========================================================================
-// Convert nominal interest rate to effective annual rate
-// Formula: EAR = (1 + r/n)^n - 1
-class InterestRateConversionPolicy {
-public:
+struct InterestRateConversionPolicy {
     static double calculate(double nominal_rate, int compounding_periods) {
-        if (compounding_periods <= 0) {
-            throw std::invalid_argument("Compounding periods must be positive");
-        }
-        
         if (nominal_rate <= -1.0) {
-            throw std::invalid_argument("Nominal rate must be greater than -1");
+            throw std::invalid_argument("nominal_rate must be > -1");
         }
-        
-        std::cout << "InterestRateConversionPolicy: Converting nominal rate=" 
-                  << nominal_rate << " with " << compounding_periods 
-                  << " compounding periods\n";
-        
-        double rate_per_period = nominal_rate / static_cast<double>(compounding_periods);
-        double effective_rate = std::pow(1.0 + rate_per_period, static_cast<double>(compounding_periods)) - 1.0;
-        
-        std::cout << "  Rate per period: " << rate_per_period << "\n";
-        std::cout << "  Effective Annual Rate: " << effective_rate << "\n";
-        
-        return effective_rate;
+        if (compounding_periods <= 0) {
+            throw std::invalid_argument("compounding_periods must be > 0");
+        }
+
+        if (compounding_periods == 1) {
+            return nominal_rate;
+        }
+        const double n = static_cast<double>(compounding_periods);
+        return std::pow(1.0 + nominal_rate / n, n) - 1.0;
     }
 };
 
-#endif
+#endif // CALCULATIONPOLICIES_HPP
+

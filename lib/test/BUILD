@@ -1,12 +1,9 @@
 cc_test (
 	name = "Calculator_Test",
-	srcs = [
-		"calculator_test.cpp"
-	],
-	timeout = "short",
+	srcs = ["calculator_test.cpp"],
 	deps = [
-		"@gtest//:gtest",
+		"//lib:Calculator",
 		"@gtest//:gtest_main",
-		"//lib:Calculator"
-	]
+	],
+        timeout = "short",
 )
